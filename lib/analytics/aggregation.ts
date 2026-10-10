@@ -59,13 +59,23 @@ async function fetchAgentLedgerData(input: {
   const horizonUrl = STELLAR_NETWORKS[network].horizonUrl;
   const startDate = getRangeStartDate(range);
 
+  const txUrl = new URL(
+    `/accounts/${encodeURIComponent(agent.agentId)}/transactions`,
+    horizonUrl
+  );
+  txUrl.searchParams.set('order', 'desc');
+  txUrl.searchParams.set('limit', String(MAX_RECORDS_PER_AGENT));
+
+  const opUrl = new URL(
+    `/accounts/${encodeURIComponent(agent.agentId)}/operations`,
+    horizonUrl
+  );
+  opUrl.searchParams.set('order', 'desc');
+  opUrl.searchParams.set('limit', String(MAX_RECORDS_PER_AGENT));
+
   const [transactionsResponse, operationsResponse] = await Promise.all([
-    fetchJson<any>(
-      `${horizonUrl}/accounts/${agent.agentId}/transactions?order=desc&limit=${MAX_RECORDS_PER_AGENT}`
-    ),
-    fetchJson<any>(
-      `${horizonUrl}/accounts/${agent.agentId}/operations?order=desc&limit=${MAX_RECORDS_PER_AGENT}`
-    ),
+    fetchJson<any>(txUrl.toString()),
+    fetchJson<any>(opUrl.toString()),
   ]);
 
   const transactions = (transactionsResponse?._embedded?.records || [])

@@ -1,12 +1,61 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { aggregateAnalytics } from '@/lib/analytics/aggregation';
-import { AnalyticsRange } from '@/lib/analytics/types';
+import { AnalyticsDataset, AnalyticsRange } from '@/lib/analytics/types';
 import { StellarNetwork } from '@/lib/types';
+import { isValidStellarAddress } from '@/lib/stellar';
 
 const ALLOWED_RANGES: AnalyticsRange[] = ['7d', '30d', '90d', '1y'];
 const ALLOWED_NETWORKS: StellarNetwork[] = ['mainnet', 'testnet', 'futurenet'];
+const MAX_OWNED_AGENTS = 50;
+const CACHE_TTL_MS = 60 * 1000;
 
-function parseAgents(raw: string | null, fallbackPrefix: string) {
+interface CacheEntry {
+  expiresAt: number;
+  data: AnalyticsDataset;
+}
+
+const analyticsCache = new Map<string, CacheEntry>();
+
+export function clearAnalyticsCache(): void {
+  analyticsCache.clear();
+}
+
+function parseOwnedAgents(raw: string | null): {
+  agents?: Array<{ agentId: string; agentName: string }>;
+  error?: string;
+} {
+  if (!raw) {
+    return { agents: [] };
+  }
+
+  const rawIds = raw
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (rawIds.length > MAX_OWNED_AGENTS) {
+    return {
+      error: `Too many ownedAgentIds provided (maximum ${MAX_OWNED_AGENTS}, received ${rawIds.length})`,
+    };
+  }
+
+  for (const agentId of rawIds) {
+    if (!isValidStellarAddress(agentId)) {
+      return {
+        error: `Invalid Stellar address in ownedAgentIds: "${agentId}"`,
+      };
+    }
+  }
+
+  const agents = rawIds.map((agentId, index) => ({
+    agentId,
+    agentName: `Owned Agent ${index + 1}`,
+  }));
+
+  return { agents };
+}
+
+function parseMarketplaceAgents(raw: string | null) {
   if (!raw) {
     return [] as Array<{ agentId: string; agentName: string }>;
   }
@@ -15,15 +64,11 @@ function parseAgents(raw: string | null, fallbackPrefix: string) {
     .split(',')
     .map((value) => value.trim())
     .filter(Boolean)
+    .slice(0, 20)
     .map((agentId, index) => ({
       agentId,
-      agentName: `${fallbackPrefix} ${index + 1}`,
+      agentName: `Marketplace Agent ${index + 1}`,
     }));
-}
-
-function parseMarketplaceAgents(raw: string | null) {
-  const agents = parseAgents(raw, 'Marketplace Agent');
-  return agents.slice(0, 20);
 }
 
 export async function GET(request: NextRequest) {
@@ -39,14 +84,37 @@ export async function GET(request: NextRequest) {
       ? (networkParam as StellarNetwork)
       : 'mainnet';
 
-    const ownedAgents = parseAgents(ownedAgentsParam, 'Owned Agent');
+    const parsedOwned = parseOwnedAgents(ownedAgentsParam);
+    if (parsedOwned.error) {
+      return NextResponse.json(
+        {
+          message: 'Invalid ownedAgentIds parameter',
+          error: parsedOwned.error,
+        },
+        { status: 400 }
+      );
+    }
+
+    const ownedAgents = parsedOwned.agents || [];
     const marketplaceAgents = parseMarketplaceAgents(marketplaceAgentsParam);
+
+    const cacheKey = `${network}:${range}:${ownedAgents.map((a) => a.agentId).sort().join(',')}:${marketplaceAgents.map((a) => a.agentId).sort().join(',')}`;
+    const now = Date.now();
+    const cached = analyticsCache.get(cacheKey);
+    if (cached && cached.expiresAt > now) {
+      return NextResponse.json(cached.data);
+    }
 
     const dataset = await aggregateAnalytics({
       network,
       range,
       ownedAgents,
       marketplaceAgents: marketplaceAgents.length > 0 ? marketplaceAgents : ownedAgents,
+    });
+
+    analyticsCache.set(cacheKey, {
+      expiresAt: now + CACHE_TTL_MS,
+      data: dataset,
     });
 
     return NextResponse.json(dataset);
@@ -60,3 +128,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
