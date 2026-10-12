@@ -54,21 +54,6 @@ export const Navigation: React.FC = () => {
     { href: "/staking", label: "Staking", icon: <StoreIcon /> },
     { href: "/learn", label: "Learn", icon: <LearnIcon /> },
     { href: "/bug-report", label: "Report Bug", icon: <BugIcon /> },
-    { href: "/marketplace", label: "Marketplace" },
-    { href: "/create", label: "Create Agent" },
-    { href: "/trading", label: "Trading" },
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/analytics", label: "Analytics" },
-    { href: "/telemetry", label: "Telemetry" },
-    { href: "/security", label: "Security" },
-    { href: "/provenance", label: "Provenance" },
-    { href: "/portfolio", label: "Portfolio" },
-    { href: "/waitlist", label: "Waitlist" },
-    { href: "/staking", label: "Staking" },
-    { href: "/learn", label: "Learn" },
-    { href: "/bug-report", label: "Report Bug" },
-    { href: "/bug-reports", label: "Bug Reports" },
-    { href: "submissions", label: "Submission Dashboard" },
 
   ];
 
