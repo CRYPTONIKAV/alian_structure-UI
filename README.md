@@ -318,6 +318,7 @@ alian_structure-UI/
 ├── app/                              # Next.js app directory
 │   ├── layout.tsx                   # Root layout
 │   ├── page.tsx                     # Home page
+│   ├── globals.css                  # Global styles
 │   ├── affiliates/                  # Affiliate routes
 │   │   ├── page.tsx
 │   │   └── [id]/page.tsx
@@ -342,20 +343,13 @@ alian_structure-UI/
 │   ├── stellar.ts                  # Stellar SDK utilities
 │   ├── stellar-constants.ts        # Network config
 │   └── api-client.ts               # API utilities
-├── styles/                          # Global styles
-│   ├── globals.css
-│   └── tailwind.config.js
 ├── public/                          # Static assets
 │   ├── images/
 │   └── icons/
 ├── tests/                           # Test suite
 │   ├── __tests__/
 │   └── e2e/
-├── docs/                            # Documentation
-│   ├── SETUP.md
-│   ├── API.md
-│   ├── ARCHITECTURE.md
-│   └── CONTRIBUTING.md
+├── CONTRIBUTING.md                  # Contribution guidelines
 ├── .env.example                     # Environment template
 ├── .env.local                       # Local config (not committed)
 ├── package.json                     # Dependencies & scripts
@@ -598,13 +592,13 @@ git push origin feature/your-feature
 
 ## 📚 Documentation
 
-- **[Setup Guide](./docs/SETUP.md)** - Detailed installation instructions
-- **[API Reference](./docs/API.md)** - Endpoint documentation
-- **[Architecture](./docs/ARCHITECTURE.md)** - System design details
 - **[Contributing](./CONTRIBUTING.md)** - Contribution guidelines
-- **[Stellar Integration](./STELLAR_WALLET_INTEGRATION.md)** - Wallet setup
-- **[PWA Guide](./docs/PWA_IMPLEMENTATION.md)** - Progressive Web App
-- **[Metrics Dashboard](./docs/metrics-dashboard.md)** - Telemetry & monitoring
+- **[Roadmap](./ROADMAP.md)** - Planned work and milestones
+- **[Changelog](./CHANGELOG.md)** - Release history
+- **[Code of Conduct](./CODE_OF_CONDUCT.md)** - Community standards
+- **[License](./LICENSE)** - MIT License
+
+> Guides previously linked here (`docs/SETUP.md`, `docs/API.md`, `docs/ARCHITECTURE.md`, `docs/PWA_IMPLEMENTATION.md`, `docs/metrics-dashboard.md`, and `STELLAR_WALLET_INTEGRATION.md`) are not in the repository yet. Use **Quick Start** above and `CONTRIBUTING.md` until those docs land.
 
 ---
 
@@ -612,7 +606,7 @@ git push origin feature/your-feature
 
 ### Getting Help
 
-- 📖 **Documentation**: Check [docs/](./docs/) first
+- 📖 **Documentation**: Check [Contributing](./CONTRIBUTING.md) and Quick Start first
 - 🐛 **Issue Tracker**: [GitHub Issues](https://github.com/SourceXXL/alian_structure-UI/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/SourceXXL/alian_structure-UI/discussions)
 - 🔗 **Backend Repo**: [alian_structure-api](https://github.com/SourceXXL/alian_structure-api)
