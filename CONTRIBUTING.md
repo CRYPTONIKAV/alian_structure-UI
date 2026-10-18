@@ -41,7 +41,31 @@ npm install
 ```bash
 cp .env.example .env.local
 ```
-Edit `.env.local` with your API keys and configuration values. The required variables are documented in `.env.example`.
+Edit `.env.local` with your API keys and configuration values.
+
+`.env.example` is grouped by the feature that consumes each variable (API, Search,
+Storage, Web push, Stellar, Version registry, Agent telemetry, Metrics, Build, Framework).
+Every entry says whether it is required or optional and, when optional, the value the
+code falls back to, so you only need to fill in what your work touches. Entries marked
+`[SECRET]` must never be committed. A final **NOT IMPLEMENTED** section lists variables
+that `README.md` still documents but no code reads — leave those alone unless you are
+adding support for them.
+
+When you add a `process.env` reference, add it to `.env.example` in the same commit. The
+variable **names** can be checked mechanically:
+
+```bash
+comm -23 \
+  <(grep -rhoE 'process\.env\.[A-Za-z_][A-Za-z0-9_]*' . \
+       --include=*.ts --include=*.tsx --include=*.js --include=*.mjs --include=*.jsx \
+       --exclude-dir=node_modules --exclude-dir=.next | sed 's/process\.env\.//' | sort -u) \
+  <(grep -oE '^[A-Za-z_][A-Za-z0-9_]*=' .env.example | tr -d '=' | sort -u)
+```
+
+An empty result means every name in the tree is present. It does **not** check the
+descriptions, fallbacks or citations — those are maintained by hand, so if you touch a
+variable's entry, confirm the fallback you wrote is character-for-character the `||`
+operand in the source and that the cited `file:line` is where the read happens.
 
 4. **Start the development server**
 ```bash
